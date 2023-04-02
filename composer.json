@@ -1,0 +1,20 @@
+{
+    "name": "rafaelduarte/olhovivo",
+    "description": "Minha biblioteca para a API olho vivo.",
+    "authors": [
+        {
+            "name": "Rafael Duarte",
+            "email": "rafa.duartef@outlook.com"
+        }
+    ],
+    "require": {
+        "php": "^8.0",
+        "illuminate/support": "^8.0",
+        "guzzlehttp/guzzle": "^7.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "RafaelDuarte\\OlhoVivo\\": "src/"
+        }
+    }
+}
