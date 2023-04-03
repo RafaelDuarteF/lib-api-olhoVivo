@@ -1,5 +1,6 @@
 # Biblioteca para a API olho vivo
 Biblioteca para consumir a API olho vivo da SP Trans.
+Obtenha todas as informações sobre os ônibus de São Paulo através dessa API. LIB em PHP para consumi-lá facilmente.
 
 Certifique-se de que você possui o composer instalado e tenha um token de aplicativo da SP Trans.
 
