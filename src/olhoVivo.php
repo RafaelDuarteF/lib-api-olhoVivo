@@ -84,6 +84,15 @@ class OlhoVivo
         return $this->execute($this->url . $this->versao . 'Parada/Buscar', $queryParams);
     } // Buscar as paradas expecíficas de São Paulo
 
+    public function buscarCorredores()
+    {
+        return json_decode(json_encode($this->execute($this->url . $this->versao . 'Corredor')), false);
+    } // Buscar todos os corredores de São Paulo
+
+    public function buscarEmpresas() {
+        return json_decode(json_encode($this->execute($this->url . $this->versao . 'Empresa')), false);
+    } // Buscar todas as empresas operadoras do transporte público de São Paulo
+
     public function buscarParadasPorLinha($codigoLinha)
     {
         $queryParams = [
@@ -91,6 +100,14 @@ class OlhoVivo
         ];
         return json_decode(json_encode($this->execute($this->url . $this->versao . 'Parada/BuscarParadasPorLinha', $queryParams)), false);;
     } // Buscar as paradas por linhas de São Paulo
+
+    public function buscarParadasPorCorredor($codigoCorredor)
+    {
+        $queryParams = [
+            'codigoCorredor' => intval($codigoCorredor),
+        ];
+        return json_decode(json_encode($this->execute($this->url . $this->versao . 'Parada/BuscarParadasPorCorredor', $queryParams)), false);
+    } // Buscar as paradas de São Paulo por corredor
 
     public function buscarPosicaoTodosOnibus()
     {
@@ -103,7 +120,16 @@ class OlhoVivo
             'codigoLinha' => intval($codigoLinha),
         ];
         return json_decode(json_encode($this->execute($this->url . $this->versao . 'Posicao/Linha', $queryParams)), false);
-    } // Buscar a posição de ônibus específicos de São Paulo
+    } // Buscar a posição de ônibus de linhas específicas de São Paulo
+
+    public function buscarVeiculosGaragem($codigoEmpresa, $codigoLinha = '')
+    {
+        $queryParams = [
+            'codigoEmpresa' => intval($codigoEmpresa),
+            'codigoLinha' => intval($codigoLinha),
+        ];
+        return json_decode(json_encode($this->execute($this->url . $this->versao . 'Posicao/Garagem', $queryParams)), false);
+    } // Buscar os veículos em garagem de empresas específicas com base ou não na linha (opcional)
 
     public function buscarPrevisaoChegadaParadaLinha($codigoParada, $codigoLinha)
     {
@@ -129,5 +155,5 @@ class OlhoVivo
         ];
         return json_decode(json_encode($this->execute($this->url . $this->versao . 'Previsao/Parada', $queryParams)), false);
     } // Buscar a previsao de chegada de paradas específicas em todas as linhas que ela abrange de São Paulo
-    
+       
 }
