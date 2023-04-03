@@ -25,7 +25,7 @@ class UserController extends Controller
         $olhoVivo = new OlhoVivo();
         $olhoVivo->token = 'seu_token';
         $olhoVivo->autenticar(); // Autenticar na API com seu token
-        $linhas = $olhoVivo->buscarLinhas('Vila sabrina');
+        $linhas = $olhoVivo->buscarLinhas('Vila sabrina'); // Retorna uma array com as linhas resultantes de sua busca
         foreach ($linhas as $linha) {
             echo $linha->cl . '<br>';
             echo $linha->tp . '<br>';
