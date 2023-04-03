@@ -1,6 +1,7 @@
 {
     "name": "rafaelduarte/olhovivo",
     "description": "Minha biblioteca para a API olho vivo.",
+    "license": "MIT",
     "authors": [
         {
             "name": "Rafael Duarte",
@@ -18,5 +19,5 @@
     },
     "minimum-stability": "stable",
     "prefer-stable": true,
-    "version": "1.0.0"
+    "version": "1.2.0"
 }
