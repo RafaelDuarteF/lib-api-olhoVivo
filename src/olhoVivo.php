@@ -128,6 +128,6 @@ class OlhoVivo
             'codigoParada' => intval($codigoParada),
         ];
         return json_decode(json_encode($this->execute($this->url . $this->versao . 'Previsao/Parada', $queryParams)), false);
-    } // Buscar a previsao de chegada de paradas específicas em todas as lunhas que ela abrange de São Paulo
+    } // Buscar a previsao de chegada de paradas específicas em todas as linhas que ela abrange de São Paulo
     
 }
