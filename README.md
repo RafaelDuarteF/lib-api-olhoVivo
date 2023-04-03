@@ -1,8 +1,8 @@
 # Biblioteca para a API olho vivo
 Biblioteca para consumir a API olho vivo da SP Trans. <br>
-Obtenha todas as informações sobre os ônibus de São Paulo através dessa API. LIB em PHP para consumi-lá facilmente.
+Obtenha todas as informações sobre os ônibus de São Paulo através dessa API. LIB em PHP para consumi-lá facilmente. 
 
-Certifique-se de que você possui o composer instalado e tenha um token de aplicativo da SP Trans.
+Certifique-se de que você possui o composer em seu projeto e tenha um token de aplicativo da SP Trans. <a href="https://www.sptrans.com.br/desenvolvedores/api-do-olho-vivo-guia-de-referencia/">Guia de referência da API</a>
 
 Instale a lib em seu projeto com o comando no composer abaixo: <br>
  ```shell
