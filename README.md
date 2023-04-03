@@ -41,6 +41,7 @@ class UserController extends Controller
         // $olhoVivo->buscarPrevisaoChegadaParadaLinha(4200953, 1989); // Buscar previsão chegada de uma parada específica e linha específica
         // $olhoVivo->buscarPrevisaoChegadaLinha(34705); // Buscar previsão chegada em todas as paradas uma a linha específica
         // $olhoVivo->buscarPrevisaoChegadaParada(4200953); // Buscar previsão de chegada de todas as linhas em uma parada específica
+        // $olhoVivo->buscarMapa(); // Buscar mapa KMZ geral, de corredores e de outras vias de São Paulo com os parâmetros = ('/Corredor', '/OutrasVias')
         
         // Acima, outras funções possíveis.
     }
