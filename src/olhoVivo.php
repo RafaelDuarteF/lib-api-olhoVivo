@@ -5,7 +5,6 @@
 namespace RafaelDuarte\OlhoVivo;
 
 use GuzzleHttp\Client;
-use GuzzleHttp\RequestOptions;
 use GuzzleHttp\Exception\RequestException;
 
 class OlhoVivo
@@ -23,7 +22,8 @@ class OlhoVivo
             $this->client = new Client([
                 'base_uri' => $this->url . $this->versao,
                 'timeout' => 2.0,
-                'cookies' => true
+                'cookies' => true,
+                'decode_content' => false
             ]); // Inicia um Client na URL informada da api
             
             $login = $this->client->request(
@@ -64,6 +64,25 @@ class OlhoVivo
             return $decodeAsJson === true ? $decoded : $request;
         } catch (RequestException $e) {
 			throw new \Exception("HTTP request/response error: {$e->getMessage()}");
+        }
+    }
+
+    public function executeObterKMZ($rota = '') {
+        $res = $this->client->request('GET', $this->url . $this->versao . 'KMZ' . $rota, [
+            'headers' => [
+                'Accept-Encoding' => 'gzip',
+                'Content-Type' => 'application/vnd.google-earth.kmz'
+            ],
+            'stream' => true
+        ]);
+            
+        // Verifica se a resposta foi bem-sucedida
+        if ($res->getStatusCode() == 200) {
+            // Salva o conteúdo do arquivo KMZ
+            file_put_contents('mapa.kmz', $res->getBody());
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -156,4 +175,8 @@ class OlhoVivo
         return json_decode(json_encode($this->execute($this->url . $this->versao . 'Previsao/Parada', $queryParams)), false);
     } // Buscar a previsao de chegada de paradas específicas em todas as linhas que ela abrange de São Paulo
     
+    public function buscarMapa($rota = '') 
+	{
+        return $this->executeObterKMZ($rota);
+	} // Busca o mapa geral, de corredores e de outras vias de SP (/Corredor, /OutrasVias)
 }
