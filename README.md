@@ -4,7 +4,7 @@ Biblioteca para consumir a API olho vivo da SP Trans.
 Certifique-se de que você possui o composer instalado e tenha um token de aplicativo da SP Trans.
 
 Instale a lib em seu projeto com o comando no composer abaixo: <br>
- ```php 
+ ```shell
  composer require rafaelduarte/olhovivo 
  ```
 
