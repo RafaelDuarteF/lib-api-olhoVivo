@@ -48,4 +48,6 @@ class UserController extends Controller
  
  ```
 
+# Documentação API
 
+Para verificar os tipos de retorno e funcionamento da API, você pode acessar a documentação oficial da API <a href="https://www.sptrans.com.br/desenvolvedores/api-do-olho-vivo-guia-de-referencia/documentacao-api/">aqui.</a>
