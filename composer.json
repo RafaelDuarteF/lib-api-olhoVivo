@@ -19,5 +19,5 @@
     },
     "minimum-stability": "stable",
     "prefer-stable": true,
-    "version": "1.20.0"
+    "version": "1.2.0"
 }

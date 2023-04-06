@@ -175,7 +175,7 @@ class OlhoVivo
         return json_decode(json_encode($this->execute($this->url . $this->versao . 'Previsao/Parada', $queryParams)), false);
     } // Buscar a previsao de chegada de paradas específicas em todas as linhas que ela abrange de São Paulo
     
-    public function buscarMapa($rota = '') 
+    public function buscarMapa($rota = '')
 	{
         return $this->executeObterKMZ($rota);
 	} // Busca o mapa geral, de corredores e de outras vias de SP (/Corredor, /OutrasVias)
