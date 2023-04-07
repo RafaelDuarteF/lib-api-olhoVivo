@@ -12,7 +12,7 @@ class OlhoVivo
     public $token;
     public $url = 'http://api.olhovivo.sptrans.com.br/';
     public $versao = "v2.1/"; // Versão da api olho vivo
-    public $autenticado = false;
+    private $autenticado = false;
     private $client;
 
     public function autenticar() // Autenticar usuário na API
@@ -32,7 +32,7 @@ class OlhoVivo
                 ['query' => ['token' => $this->token]]
             ); // Realiza a request de autenticação com o token de aplicativo
             if (!(json_decode($login->getBody()))) { // Retorna true para autenticado e false para não autenticado
-                throw new \Exception("Erro ao autenticar com este token."); 
+                throw new \Exception("Erro ao autenticar com este token.");
             } elseif (!($login->hasHeader('Set-Cookie'))) {
                 throw new \Exception("O servidor não está configurado para definir as credenciais necessárias para a autenticação do usuário.");
             }
@@ -67,7 +67,8 @@ class OlhoVivo
         }
     }
 
-    public function executeObterKMZ($rota = '') {
+    public function executeObterKMZ($rota = '')
+    {
         $res = $this->client->request('GET', $this->url . $this->versao . 'KMZ' . $rota, [
             'headers' => [
                 'Accept-Encoding' => 'gzip',
@@ -108,7 +109,8 @@ class OlhoVivo
         return json_decode(json_encode($this->execute($this->url . $this->versao . 'Corredor')), false);
     } // Buscar todos os corredores de São Paulo
 
-    public function buscarEmpresas() {
+    public function buscarEmpresas()
+    {
         return json_decode(json_encode($this->execute($this->url . $this->versao . 'Empresa')), false);
     } // Buscar todas as empresas operadoras do transporte público de São Paulo
 
@@ -117,7 +119,7 @@ class OlhoVivo
         $queryParams = [
             'codigoLinha' => intval($codigoLinha),
         ];
-        return json_decode(json_encode($this->execute($this->url . $this->versao . 'Parada/BuscarParadasPorLinha', $queryParams)), false);;
+        return json_decode(json_encode($this->execute($this->url . $this->versao . 'Parada/BuscarParadasPorLinha', $queryParams)), false);
     } // Buscar as paradas por linhas de São Paulo
 
     public function buscarParadasPorCorredor($codigoCorredor)
