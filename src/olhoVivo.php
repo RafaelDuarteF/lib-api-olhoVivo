@@ -67,7 +67,7 @@ class OlhoVivo
         }
     }
 
-    public function executeObterKMZ($rota = '')
+    private function executeObterKMZ($rota = '')
     {
         $res = $this->client->request('GET', $this->url . $this->versao . 'KMZ' . $rota, [
             'headers' => [
