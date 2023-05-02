@@ -197,7 +197,7 @@ class OlhoVivo
 
     public function buscarPrevisaoChegadaLinha( string|int $codigoLinha)
     {
-        if(!$this->verificarCodigos($codigoLinha)) {
+        if (!$this->verificarCodigos($codigoLinha)) {
             return 'O código deve ter apenas caracteres númericos!';
         }
         $queryParams = [
