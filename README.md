@@ -23,10 +23,8 @@ use RafaelDuarte\OlhoVivo\OlhoVivo;
 class UserController extends Controller
 {
     public function index() {
-        $olhoVivo = new OlhoVivo();
-        $olhoVivo->token = 'seu_token';
-        $olhoVivo->autenticar(); // Autenticar na API com seu token
-        $linhas = $olhoVivo->buscarLinhas('Vila sabrina'); // Retorna uma array com as linhas resultantes de sua busca
+        $olhoVivo = new OlhoVivo('seu_token'); // realiza o processo de autenticação com o token passado já na instância
+        $linhas = $olhoVivo->buscarLinhas('Vila sabrina'); // Retorna um objeto com as linhas resultantes de sua busca
         foreach ($linhas as $linha) {
             echo $linha->cl . '<br>';
             echo $linha->tp . '<br>';
@@ -42,6 +40,7 @@ class UserController extends Controller
         // $olhoVivo->buscarPrevisaoChegadaLinha(34705); // Buscar previsão chegada em todas as paradas uma a linha específica
         // $olhoVivo->buscarPrevisaoChegadaParada(4200953); // Buscar previsão de chegada de todas as linhas em uma parada específica
         // $olhoVivo->buscarMapa(); // Buscar mapa KMZ geral, de corredores e de outras vias de São Paulo com os parâmetros = ('/Corredor', '/OutrasVias')
+        // $olhoVivo->espBuscarChegadasParadaLinha('1732-10', 'Nothmann'); // Busca especializada das chegadas previstas na Nothmann da linha 1732-10
         
         // Acima, outras funções possíveis.
     }
