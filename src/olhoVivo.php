@@ -15,6 +15,14 @@ class OlhoVivo
     private $autenticado = false;
     private $client;
 
+    public function __construct(string $token = '')
+    {
+        $this->token = $token;
+        if ($this->token != '') {
+            $this->autenticar();
+        }
+    }
+    
     public function autenticar() // Autenticar usuário na API
     {
         $return = false;
@@ -67,7 +75,7 @@ class OlhoVivo
         }
     }
 
-    private function executeObterKMZ($rota = '')
+    private function executeObterKMZ(string $rota = '')
     {
         $res = $this->client->request('GET', $this->url . $this->versao . 'KMZ' . $rota, [
             'headers' => [
@@ -87,16 +95,27 @@ class OlhoVivo
         }
     }
 
-    public function buscarLinhas($linha)
+    public function verificarCodigos(...$codigos)
+    {
+        foreach ($codigos as $codigo) {
+            if (!is_numeric($codigo)) {
+              return false; // retorna falso se algum parâmetro não for número
+            }
+        }
+        return true; // retorna verdadeiro se todos os parâmetros forem números
+    }
+        
+
+    public function buscarLinhas(string|int $linha)
     { // Buscar as linhas expecíficas de São Paulo
         $queryParams = [
             'termosBusca' => $linha,
         ];
-        return json_encode($this->execute($this->url . $this->versao . 'Linha/Buscar', $queryParams));
+        return json_decode(json_encode($this->execute($this->url . $this->versao . 'Linha/Buscar', $queryParams)), false);
         // Retorna um objeto
     }
 
-    public function buscarParadas($endereco)
+    public function buscarParadas(string $endereco)
     {
         $queryParams = [
             'termosBusca' => $endereco,
@@ -106,28 +125,34 @@ class OlhoVivo
 
     public function buscarCorredores()
     {
-        return json_encode($this->execute($this->url . $this->versao . 'Corredor'));
+        return json_decode(json_encode($this->execute($this->url . $this->versao . 'Corredor')), false);
     } // Buscar todos os corredores de São Paulo
 
     public function buscarEmpresas()
     {
-        return json_encode($this->execute($this->url . $this->versao . 'Empresa'));
+        return json_decode(json_encode($this->execute($this->url . $this->versao . 'Empresa')), false);
     } // Buscar todas as empresas operadoras do transporte público de São Paulo
 
-    public function buscarParadasPorLinha($codigoLinha)
+    public function buscarParadasPorLinha(string|int $codigoLinha)
     {
+        if(!$this->verificarCodigos($codigoLinha)) {
+            return 'O código deve ter apenas caracteres númericos!';
+        }
         $queryParams = [
             'codigoLinha' => intval($codigoLinha),
         ];
-        return json_encode($this->execute($this->url . $this->versao . 'Parada/BuscarParadasPorLinha', $queryParams));
+        return json_decode(json_encode($this->execute($this->url . $this->versao . 'Parada/BuscarParadasPorLinha', $queryParams)), false);
     } // Buscar as paradas por linhas de São Paulo
 
-    public function buscarParadasPorCorredor($codigoCorredor)
+    public function buscarParadasPorCorredor(string|int $codigoCorredor)
     {
+        if(!$this->verificarCodigos($codigoCorredor)) {
+            return 'O código deve ter apenas caracteres númericos!';
+        }
         $queryParams = [
             'codigoCorredor' => intval($codigoCorredor),
         ];
-        return json_encode($this->execute($this->url . $this->versao . 'Parada/BuscarParadasPorCorredor', $queryParams));
+        return json_decode(json_encode($this->execute($this->url . $this->versao . 'Parada/BuscarParadasPorCorredor', $queryParams)), false);
     } // Buscar as paradas de São Paulo por corredor
 
     public function buscarPosicaoTodosOnibus()
@@ -135,46 +160,61 @@ class OlhoVivo
         return json_encode($this->execute($this->url . $this->versao . 'Posicao'));
     } // Buscar as posições de todos os ônibus de de São Paulo
 
-    public function buscarPosicaoOnibusEspecifico($codigoLinha)
+    public function buscarPosicaoOnibusEspecifico(string|int $codigoLinha)
     {
+        if(!$this->verificarCodigos($codigoLinha)) {
+            return 'O código deve ter apenas caracteres númericos!';
+        }
         $queryParams = [
             'codigoLinha' => intval($codigoLinha),
         ];
-        return json_encode($this->execute($this->url . $this->versao . 'Posicao/Linha', $queryParams));
+        return json_decode(json_encode($this->execute($this->url . $this->versao . 'Posicao/Linha', $queryParams)), false);
     } // Buscar a posição de ônibus de linhas específicas de São Paulo
 
-    public function buscarVeiculosGaragem($codigoEmpresa, $codigoLinha = '')
+    public function buscarVeiculosGaragem(string|int $codigoEmpresa, string|int $codigoLinha)
     {
+        if(!$this->verificarCodigos($codigoEmpresa, $codigoLinha)) {
+            return 'O código deve ter apenas caracteres númericos!';
+        }
         $queryParams = [
             'codigoEmpresa' => intval($codigoEmpresa),
             'codigoLinha' => intval($codigoLinha),
         ];
-        return json_encode($this->execute($this->url . $this->versao . 'Posicao/Garagem', $queryParams));
+        return json_decode(json_encode($this->execute($this->url . $this->versao . 'Posicao/Garagem', $queryParams)), false);
     } // Buscar os veículos em garagem de empresas específicas com base ou não na linha (opcional)
 
-    public function buscarPrevisaoChegadaParadaLinha($codigoParada, $codigoLinha)
+    public function buscarPrevisaoChegadaParadaLinha(string|int $codigoParada, string|int $codigoLinha)
     {
+        if(!$this->verificarCodigos($codigoParada, $codigoLinha)) {
+            return 'O código deve ter apenas caracteres númericos!';
+        }
         $queryParams = [
             'codigoParada' => intval($codigoParada),
             'codigoLinha' => intval($codigoLinha),
         ];
-        return json_encode($this->execute($this->url . $this->versao . 'Previsao', $queryParams));
+        return json_decode(json_encode($this->execute($this->url . $this->versao . 'Previsao', $queryParams)), false);
     } // Buscar a previsao de chegada de paradas específicas para linhas específicas de São Paulo
 
-    public function buscarPrevisaoChegadaLinha($codigoLinha)
+    public function buscarPrevisaoChegadaLinha( string|int $codigoLinha)
     {
+        if(!$this->verificarCodigos($codigoLinha)) {
+            return 'O código deve ter apenas caracteres númericos!';
+        }
         $queryParams = [
             'codigoLinha' => intval($codigoLinha),
         ];
-        return json_encode($this->execute($this->url . $this->versao . 'Previsao/Linha', $queryParams));
+        return json_decode(json_encode($this->execute($this->url . $this->versao . 'Previsao/Linha', $queryParams)), false);
     } // Buscar a previsao de chegada de linhas específicas em todas as paradas que ela abrange de São Paulo
     
-    public function buscarPrevisaoChegadaParada($codigoParada)
+    public function buscarPrevisaoChegadaParada(string|int $codigoParada)
     {
+        if(!$this->verificarCodigos($codigoParada)) {
+            return 'O código deve ter apenas caracteres númericos!';
+        }
         $queryParams = [
             'codigoParada' => intval($codigoParada),
         ];
-        return json_encode($this->execute($this->url . $this->versao . 'Previsao/Parada', $queryParams));
+        return json_decode(json_encode($this->execute($this->url . $this->versao . 'Previsao/Parada', $queryParams)), false);
     } // Buscar a previsao de chegada de paradas específicas em todas as linhas que ela abrange de São Paulo
     
     public function buscarMapa($rota = '')
@@ -186,9 +226,12 @@ class OlhoVivo
     // FUNÇÕES ESPECIALIZADAS (PODEM SER MAIS PRECISAS)
 
 
-    public function espBuscarChegadasLinhaParadas($linha, $parada)
+    public function espBuscarChegadasLinhaParadas(string|int $linha, string|int $parada)
     // Busca especializada das chegadas de uma linha em uma parada
     {
+        if (!$this->autenticado) {
+            return 'Você não está autenticado';
+        }
         $return = false;
         $jsonArray = array();
         if (empty($linha) || empty($parada)) {
@@ -199,7 +242,7 @@ class OlhoVivo
                 $linhaCod = intval($this->buscarLinhas($linha)[0]->cl);
                 $parada = intval($this->buscarParadas($parada)[0]['cp']);
                 $prevChegadaLinha = $this->buscarPrevisaoChegadaLinha($linhaCod);
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 $return = 'invalid';
             }
             if ($return != 0) {
@@ -219,7 +262,7 @@ class OlhoVivo
                             "linha" => $jsonArray[0],
                             "chegada" => $jsonArray[1],
                         );
-                        return json_encode($jsonArray);
+                        return json_decode(json_encode($jsonArray), false);
                     }
                     $i++;
                 }
