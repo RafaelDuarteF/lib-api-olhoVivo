@@ -135,7 +135,7 @@ class OlhoVivo
 
     public function buscarParadasPorLinha(string|int $codigoLinha)
     {
-        if(!$this->verificarCodigos($codigoLinha)) {
+        if (!$this->verificarCodigos($codigoLinha)) {
             return 'O código deve ter apenas caracteres númericos!';
         }
         $queryParams = [
@@ -146,7 +146,7 @@ class OlhoVivo
 
     public function buscarParadasPorCorredor(string|int $codigoCorredor)
     {
-        if(!$this->verificarCodigos($codigoCorredor)) {
+        if (!$this->verificarCodigos($codigoCorredor)) {
             return 'O código deve ter apenas caracteres númericos!';
         }
         $queryParams = [
@@ -162,7 +162,7 @@ class OlhoVivo
 
     public function buscarPosicaoOnibusEspecifico(string|int $codigoLinha)
     {
-        if(!$this->verificarCodigos($codigoLinha)) {
+        if (!$this->verificarCodigos($codigoLinha)) {
             return 'O código deve ter apenas caracteres númericos!';
         }
         $queryParams = [
@@ -185,7 +185,7 @@ class OlhoVivo
 
     public function buscarPrevisaoChegadaParadaLinha(string|int $codigoParada, string|int $codigoLinha)
     {
-        if(!$this->verificarCodigos($codigoParada, $codigoLinha)) {
+        if (!$this->verificarCodigos($codigoParada, $codigoLinha)) {
             return 'O código deve ter apenas caracteres númericos!';
         }
         $queryParams = [
@@ -208,7 +208,7 @@ class OlhoVivo
     
     public function buscarPrevisaoChegadaParada(string|int $codigoParada)
     {
-        if(!$this->verificarCodigos($codigoParada)) {
+        if (!$this->verificarCodigos($codigoParada)) {
             return 'O código deve ter apenas caracteres númericos!';
         }
         $queryParams = [
