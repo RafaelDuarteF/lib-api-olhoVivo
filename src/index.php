@@ -1,24 +1,36 @@
 <?php
 
-// Biblioteca para acessar a API do olho vivo, SP Trans - Rafael Duarte
-
 namespace RafaelDuarte\OlhoVivo;
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+
+require_once dirname(__DIR__) . '/vendor/autoload.php';
+
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
+use Dotenv\Dotenv;
+
 
 class OlhoVivo
 {
-    public $token;
-    public $url = 'http://api.olhovivo.sptrans.com.br/';
+    public string $token;
+    public string $url;
     public $versao = "v2.1/"; // Versão da api olho vivo
     private $autenticado = false;
     private $client;
 
-    public function __construct(string $token = '')
+    public function __construct()
     {
-        $this->token = $token;
-        if ($this->token != '') {
+        $dotenv = Dotenv::createImmutable(dirname(__DIR__));
+
+        $dotenv->load();
+
+        $this->url = $_ENV['SP_TRANS_API_ENDPOINT'];
+
+        $this->token = $_ENV['SP_TRANS_API_KEY'];
+        if (!empty($this->token)) {
             $this->autenticar();
         }
     }
@@ -55,7 +67,7 @@ class OlhoVivo
         }
     }
 
-public function buscarCorredores()
+    public function buscarCorredores()
     {
         return json_decode(json_encode($this->execute($this->url . $this->versao . 'Corredor')), false);
     }
@@ -80,12 +92,12 @@ public function buscarCorredores()
         }
     }
 
-public function buscarEmpresas()
+    public function buscarEmpresas()
     {
         return json_decode(json_encode($this->execute($this->url . $this->versao . 'Empresa')), false);
     }
 
-public function buscarParadasPorLinha(string|int $codigoLinha)
+    public function buscarParadasPorLinha(string|int $codigoLinha)
     {
         if (!$this->verificarCodigos($codigoLinha)) {
             return 'O código deve ter apenas caracteres númericos!';
@@ -96,7 +108,7 @@ public function buscarParadasPorLinha(string|int $codigoLinha)
         return json_decode(json_encode($this->execute($this->url . $this->versao . 'Parada/BuscarParadasPorLinha', $queryParams)), false);
     }
 
-        public function verificarCodigos(...$codigos)
+    public function verificarCodigos(...$codigos)
     {
         foreach ($codigos as $codigo) {
             if (!is_numeric($codigo)) {
@@ -173,7 +185,7 @@ public function buscarParadasPorLinha(string|int $codigoLinha)
         return $this->executeObterKMZ($rota);
     } // Buscar os veículos em garagem de empresas específicas com base ou não na linha (opcional)
 
-        private function executeObterKMZ(string $rota = '')
+    private function executeObterKMZ(string $rota = '')
     {
         $res = $this->client->request('GET', $this->url . $this->versao . 'KMZ' . $rota, [
             'headers' => [
@@ -193,7 +205,7 @@ public function buscarParadasPorLinha(string|int $codigoLinha)
         }
     } // Buscar a previsao de chegada de paradas específicas para linhas específicas de São Paulo
 
-        public function espBuscarChegadasLinhaParadas(string|int $linha, string|int $parada)
+    public function espBuscarChegadasLinhaParadas(string|int $linha, string|int $parada)
         // Busca especializada das chegadas de uma linha em uma parada
     {
         if (!$this->autenticado) {
@@ -238,7 +250,7 @@ public function buscarParadasPorLinha(string|int $codigoLinha)
         return $return;
     } // Buscar a previsao de chegada de linhas específicas em todas as paradas que ela abrange de São Paulo
 
-        public function buscarLinhas(string|int $linha)
+    public function buscarLinhas(string|int $linha)
     { // Buscar as linhas expecíficas de São Paulo
         $queryParams = [
             'termosBusca' => $linha,
@@ -258,7 +270,7 @@ public function buscarParadasPorLinha(string|int $codigoLinha)
 
     // FUNÇÕES ESPECIALIZADAS (PODEM SER MAIS PRECISAS)
 
-public function buscarPrevisaoChegadaLinha(string|int $codigoLinha)
+    public function buscarPrevisaoChegadaLinha(string|int $codigoLinha)
     {
         if (!$this->verificarCodigos($codigoLinha)) {
             return 'O código deve ter apenas caracteres númericos!';
@@ -269,3 +281,4 @@ public function buscarPrevisaoChegadaLinha(string|int $codigoLinha)
         return json_decode(json_encode($this->execute($this->url . $this->versao . 'Previsao/Linha', $queryParams)), false);
     }
 }
+
