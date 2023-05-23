@@ -1,0 +1,20 @@
+version: '3'
+services:
+  app.test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        WWWGROUP: 'www_group'
+    image: php-8.2/app
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    ports:
+      - '${APP_PORT:-80}:80'
+    environment:
+      WWWUSER: 'app'
+      WWWGROUP: 'www_group'
+      IGNITION_LOCAL_SITES_PATH: '${PWD}'
+    volumes:
+      - './:/var/www/html'
+      - './vendor:/var/www/html/vendor'

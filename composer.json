@@ -6,11 +6,16 @@
         {
             "name": "Rafael Duarte",
             "email": "rafa.duartef@outlook.com"
+        },
+        {
+            "name": "Rech",
+            "email": "rechless.new@gmail.com"
         }
     ],
     "require": {
         "php": "^8.0",
-        "guzzlehttp/guzzle": "^7.5"
+        "guzzlehttp/guzzle": "^7.5",
+        "vlucas/phpdotenv": "^5.5"
     },
     "autoload": {
         "psr-4": {
