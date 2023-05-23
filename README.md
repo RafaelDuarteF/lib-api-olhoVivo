@@ -7,6 +7,13 @@ Certifique-se de que você possui o composer em seu projeto e tenha um token de 
  ```shell
  composer require rafaelduarte/olhovivo 
  ```
+Você pode registrar sua chave de api no site da [SpTrans](https://www.sptrans.com.br/desenvolvedores/)
+
+Com sua chave em mãos adicione as seguintes chaves em seu arquivo .env
+```dotenv
+SP_TRANS_API_KEY=SUA_CHAVE
+SP_TRANS_API_ENDPOINT=http://api.olhovivo.sptrans.com.br/
+```
 
 Importe no arquivo que deseja usar com: use RafaelDuarte\OlhoVivo\OlhoVivo;
 
