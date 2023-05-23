@@ -11,29 +11,41 @@ use GuzzleHttp\Exception\{
     GuzzleException,
     RequestException
 };
+use InvalidArgumentException;
 
 Dotenv::createImmutable(dirname(__DIR__))->load();
 
 class OlhoVivo extends Exceptions
 {
-    private string $token;
     private Client $client;
 
     /**
      * @param bool $isAuthenticated
+     * @param string $token
      * @param string $endpoint
      * @param string $apiVersion
-     * @throws Exceptions
-     * @throws GuzzleException
+     * @throws GuzzleException|Exceptions
      */
     public function __construct(
-        public bool   $isAuthenticated = false,
-        public string $endpoint = '',
-        public string $apiVersion = "",
+        public bool    $isAuthenticated = false,
+        private string $token = '',
+        public string  $endpoint = '',
+        public string  $apiVersion = "",
     )
     {
         parent::__construct();
 
+        $this->setApiInfos();
+
+        $this->checkApiInfos();
+
+        $this->authenticate();
+    }
+
+
+    /** @noinspection PhpUndefinedFunctionInspection */
+    public function setApiInfos(): void
+    {
         if (function_exists('env')) {
             $this->endpoint = env('SP_TRANS_API_ENDPOINT');
             $this->token = env('SP_TRANS_API_KEY');
@@ -43,25 +55,29 @@ class OlhoVivo extends Exceptions
             $this->token = $_ENV['SP_TRANS_API_KEY'];
             $this->apiVersion = $_ENV['SP_TRANS_API_VERSION'];
         }
-
-        try {
-            if (empty($this->token)) {
-                throw new Exceptions('Empty SP_TRANS_API_KEY');
-            } elseif (empty($this->endpoint)) {
-                throw new Exceptions('Empty SP_TRANS_API_ENDPOINT');
-            } elseif (empty($this->apiVersion)) {
-                throw new Exceptions('Empty SP_TRANS_API_VERSION');
-            }
-        } catch (Exceptions $e) {
-            echo $e->getMessage();
-            die;
-        }
-
-        $this->authenticate();
     }
 
     /**
-     * @throws GuzzleException
+     * @return void
+     */
+    public function checkApiInfos(): void
+    {
+        try {
+            if (empty($this->token)) {
+                throw new InvalidArgumentException('Empty SP_TRANS_API_KEY');
+            } elseif (empty($this->endpoint)) {
+                throw new InvalidArgumentException('Empty SP_TRANS_API_ENDPOINT');
+            } elseif (empty($this->apiVersion)) {
+                throw new InvalidArgumentException('Empty SP_TRANS_API_VERSION');
+            }
+        } catch (InvalidArgumentException $e) {
+            echo $e->getMessage();
+            die;
+        }
+    }
+
+    /**
+     * @throws GuzzleException|Exceptions
      */
     public function authenticate(): void
     {
@@ -80,16 +96,21 @@ class OlhoVivo extends Exceptions
 
             $this->isAuthenticated = json_decode($response->getBody());
 
-            if (!$this->isAuthenticated) {
-                throw new Exceptions('Erro ao autenticar');
-            }
+            $this->checkAuthentication();
 
-        } catch (Exceptions $e) {
-            echo $e->getMessage();
-            die;
         } catch (ClientException $e) {
             echo Message::toString($e->getRequest());
             die;
+        }
+    }
+
+    /**
+     * @throws Exceptions
+     */
+    public function checkAuthentication(): void
+    {
+        if (!$this->isAuthenticated) {
+            throw new Exceptions('Unauthenticated');
         }
     }
 
