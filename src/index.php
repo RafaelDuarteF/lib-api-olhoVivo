@@ -27,9 +27,10 @@ class OlhoVivo
 
         $dotenv->load();
 
-        $this->url = $_ENV['SP_TRANS_API_ENDPOINT'];
+        $this->url = $_ENV['SP_TRANS_API_ENDPOINT'] ?? env('SP_TRANS_API_ENDPOINT');
 
-        $this->token = $_ENV['SP_TRANS_API_KEY'];
+        $this->token = $_ENV['SP_TRANS_API_KEY'] ?? env('SP_TRANS_API_KEY');
+
         if (!empty($this->token)) {
             $this->autenticar();
         }
