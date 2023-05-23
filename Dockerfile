@@ -11,7 +11,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 RUN apt-get update
 
-RUN apt-get install -y gnupg gosu curl ca-certificates zip unzip git supervisor libcap2-bin python2 dnsutils
+RUN apt-get install -y gnupg gosu curl ca-certificates zip unzip git supervisor libcap2-bin python2 dnsutils nano
 
 RUN curl -sS 'https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x14aa40ec0831756756d7f66c4f4ea0aae5267a6c' | gpg --dearmor | tee /etc/apt/keyrings/ppa_ondrej_php.gpg > /dev/null
 
@@ -29,17 +29,14 @@ RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 RUN groupadd --force -g 1000 www_group && useradd -ms /bin/bash --no-user-group -g www_group -u 1000 app
 
-COPY ./start-container /usr/local/bin/start-container
-COPY ./supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-
 RUN mkdir -p /var/www/html/vendor
 
-RUN chmod +x /usr/local/bin/start-container
-
+COPY start-container /usr/local/bin/start-container
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY composer.json /var/www/html
 COPY composer.lock /var/www/html
 
-RUN composer install
+RUN chmod +x /usr/local/bin/start-container
 
 EXPOSE 80
 

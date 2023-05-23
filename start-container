@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+composer update
+
 composer install
+
+composer dump-autoload
 
 exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf -n

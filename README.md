@@ -13,6 +13,7 @@ Com sua chave em mãos adicione as seguintes chaves em seu arquivo .env
 ```dotenv
 SP_TRANS_API_KEY=SUA_CHAVE
 SP_TRANS_API_ENDPOINT=http://api.olhovivo.sptrans.com.br/
+SP_TRANS_API_VERSION=v2.1/
 ```
 
 Importe no arquivo que deseja usar com: use RafaelDuarte\OlhoVivo\OlhoVivo;
@@ -24,7 +25,7 @@ Importe no arquivo que deseja usar com: use RafaelDuarte\OlhoVivo\OlhoVivo;
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use RafaelDuarte\OlhoVivo\OlhoVivo;
+use RafaelDuarte\SpTrans\OlhoVivo\Classes;
 
 class UserController extends Controller
 {
