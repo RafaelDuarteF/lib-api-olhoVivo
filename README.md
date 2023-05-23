@@ -4,7 +4,6 @@ Obtenha todas as informações sobre os ônibus de São Paulo através dessa API
 
 Certifique-se de que você possui o composer em seu projeto e tenha um token de aplicativo da SP Trans. <a href="https://www.sptrans.com.br/desenvolvedores/api-do-olho-vivo-guia-de-referencia/">Guia de referência da API</a>
 
-Instale a lib em seu projeto com o comando no composer abaixo: <br>
  ```shell
  composer require rafaelduarte/olhovivo 
  ```
@@ -51,3 +50,30 @@ class UserController extends Controller
 # Documentação API
 
 Para verificar os tipos de retorno e funcionamento da API, você pode acessar a documentação oficial da API <a href="https://www.sptrans.com.br/desenvolvedores/api-do-olho-vivo-guia-de-referencia/documentacao-api/">aqui.</a>
+
+# Pré-requisitos para contribuir
+Certifique-se de ter o Docker e o Docker Compose instalados em seu sistema. <br>
+Se ainda não os tiver, você pode instalá-los seguindo as instruções oficiais:
+Docker: [Instalação do Docker](https://docs.docker.com/get-docker/) <br>
+Docker Compose: [Instalação do Docker Compose](https://docs.docker.com/compose/install/)
+
+### Passos
+1. Clone o repositório do projeto para o seu ambiente local.
+2. Navegue até o diretório raiz do projeto.
+
+3. No terminal, execute o seguinte comando para construir as imagens do Docker e iniciar os containers:
+```shell
+docker-compose up --build 
+```
+Isso irá construir as imagens e iniciar os containers com base nas configurações definidas no arquivo docker-compose.yml.
+
+O código fonte do projeto está vinculado ao contêiner e será sincronizado automaticamente. <br>
+Isso significa que qualquer alteração feita nos arquivos locais será refletida no contêiner em tempo real.
+Instale a lib em seu projeto com o comando no composer abaixo: <br>
+
+Para parar a execução do projeto, você pode pressionar `Ctrl + C` no terminal onde o `docker-compose up` foi executado ou executar o seguinte comando no diretório raiz do projeto:
+```shell
+docker-compose down
+```
+Com essas instruções, você poderá executar o projeto utilizando o Docker e o Docker Compose, garantindo um ambiente isolado e facilitando o processo de desenvolvimento e execução.
+
