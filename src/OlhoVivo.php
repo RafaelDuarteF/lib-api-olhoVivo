@@ -2,96 +2,123 @@
 
 namespace RafaelDuarte;
 
-use Dotenv\Dotenv;
+use stdClass;
 use Exception;
-use GuzzleHttp\Client as Client;
-use GuzzleHttp\Psr7\Message;
-use GuzzleHttp\Exception\{
-    ClientException,
-    GuzzleException,
-    RequestException
-};
 use InvalidArgumentException;
+
+use Dotenv\Dotenv;
+use GuzzleHttp\Client;
+use GuzzleHttp\Psr7\Message;
+use Psr\Http\Message\StreamInterface;
+use GuzzleHttp\Exception\{ClientException, GuzzleException};
+
 
 Dotenv::createImmutable(dirname(__DIR__))->load();
 
-class OlhoVivo extends Exceptions
+class OlhoVivo extends Exception
 {
+    private const SP_TRANS_API_KEY = 'SP_TRANS_API_KEY';
+
+    private const SP_TRANS_API_BASE_URL = 'SP_TRANS_API_BASE_URL';
+
+    private const SP_TRANS_API_VERSION = 'SP_TRANS_API_VERSION';
+
     private Client $client;
 
     /**
      * @param bool $isAuthenticated
-     * @param string $token
-     * @param string $endpoint
+     * @param array $clientOptions
+     * @param string $apiBaseUrl
+     * @param string $apiToken
      * @param string $apiVersion
-     * @throws GuzzleException|Exceptions
+     *
+     * @throws Exceptions | GuzzleException
      */
     public function __construct(
-        public bool    $isAuthenticated = false,
-        private string $token = '',
-        public string  $endpoint = '',
-        public string  $apiVersion = "",
+        public bool   $isAuthenticated = false,
+        public array  $clientOptions = [],
+        public string $apiBaseUrl = '',
+        public string $apiToken = '',
+        public string $apiVersion = '',
     )
     {
         parent::__construct();
 
-        $this->setApiInfos();
+        $this->setApiEnvironmentVariables();
 
-        $this->checkApiInfos();
+        $this->checkApiEnvironmentVariables();
+
+        $this->setClientOptions();
 
         $this->authenticate();
     }
 
-
-    /** @noinspection PhpUndefinedFunctionInspection */
-    public function setApiInfos(): void
+    /**
+     * Define as propriedades da api com base no arquivo env
+     *
+     * @return void
+     *
+     * @noinspection PhpUndefinedFunctionInspection
+     */
+    public function setApiEnvironmentVariables(): void
     {
         if (function_exists('env')) {
-            $this->endpoint = env('SP_TRANS_API_ENDPOINT');
-            $this->token = env('SP_TRANS_API_KEY');
-            $this->apiVersion = env('SP_TRANS_API_VERSION');
-        } else {
-            $this->endpoint = $_ENV['SP_TRANS_API_ENDPOINT'];
-            $this->token = $_ENV['SP_TRANS_API_KEY'];
-            $this->apiVersion = $_ENV['SP_TRANS_API_VERSION'];
+            $this->apiBaseUrl = env(self::SP_TRANS_API_BASE_URL);
+            $this->apiVersion = env(self::SP_TRANS_API_VERSION);
+            $this->apiToken = env(self::SP_TRANS_API_KEY);
+            return;
         }
+
+        $this->apiBaseUrl = $_ENV[self::SP_TRANS_API_BASE_URL];
+        $this->apiVersion = $_ENV[self::SP_TRANS_API_VERSION];
+        $this->apiToken = $_ENV[self::SP_TRANS_API_KEY];
     }
 
     /**
+     * Define as opções do Client
+     *
      * @return void
      */
-    public function checkApiInfos(): void
+    public function setClientOptions(): void
+    {
+        $this->clientOptions = [
+            'base_uri' => $this?->apiBaseUrl . $this?->apiVersion,
+            'timeout' => 2.0,
+            'cookies' => true,
+            'decode_content' => false
+        ];
+    }
+
+    /**
+     * Verifica se todas as propriedades da api foram corretamente definidas
+     *
+     * @return void
+     */
+    private function checkApiEnvironmentVariables(): void
     {
         try {
-            if (empty($this->token)) {
-                throw new InvalidArgumentException('Empty SP_TRANS_API_KEY');
-            } elseif (empty($this->endpoint)) {
-                throw new InvalidArgumentException('Empty SP_TRANS_API_ENDPOINT');
-            } elseif (empty($this->apiVersion)) {
-                throw new InvalidArgumentException('Empty SP_TRANS_API_VERSION');
-            }
-        } catch (InvalidArgumentException $e) {
-            echo $e->getMessage();
+            empty($this->apiToken) && throw new InvalidArgumentException;
+            empty($this->apiBaseUrl) && throw new InvalidArgumentException;
+            empty($this->apiVersion) && throw new InvalidArgumentException;
+        } catch (InvalidArgumentException) {
+            echo "Failed to read one or more environment variables from the .env file.";
             die;
         }
     }
 
     /**
+     * Efetua a autenticação com a api
+     *
      * @throws GuzzleException|Exceptions
      */
-    public function authenticate(): void
+    protected function authenticate(): void
     {
         try {
-            $this->client = new Client([
-                'base_uri' => $this->endpoint . $this->apiVersion,
-                'timeout' => 2.0,
-                'cookies' => true,
-                'decode_content' => false
-            ]);
+            $this->client = new Client($this->clientOptions);
 
             $response = $this->client->post(
                 'Login/Autenticar',
-                ['query' => ['token' => $this->token]]
+                ['query' => ['token' => $this->apiToken]]
             );
 
             $this->isAuthenticated = json_decode($response->getBody());
@@ -105,228 +132,313 @@ class OlhoVivo extends Exceptions
     }
 
     /**
+     * Verifica se o Client está autenticado com a api
+     *
      * @throws Exceptions
      */
-    public function checkAuthentication(): void
+    private function checkAuthentication(): void
     {
         if (!$this->isAuthenticated) {
             throw new Exceptions('Unauthenticated');
         }
     }
 
-    public function buscarCorredores()
+    /**
+     * Executa requisições do tipo GET
+     *
+     * @param string $endpoint O endpoint a ser consultado ex: 'Linha/Buscar'.
+     * @param array $params ['param name' => 'param value'] Os query params a serem passados na consulta.
+     *
+     * @return array | stdClass
+     */
+    public function executeGetRequest(string $endpoint, array $params = []): array|stdClass
     {
-        return json_decode(json_encode($this->execute($this->endpoint . $this->apiVersion . 'Corredor')), false);
-    }
+        $response = null;
 
-    private function execute($uri, $params = [], bool $decodeAsJson = true)
-    { // Executar requisição via GET para os endpoints da API
-        if (!$this->isAuthenticated) {
-            return 'Você não está autenticado';
-        }
         try {
-            do {
-                $request = ($this->client->request(
-                    'GET',
-                    $uri,
-                    count($params) > 0 ? ['query' => $params] : []
-                ))->getBody();
-                $decoded = json_decode($request, true);
-            } while (isset($decoded['Message']));
-            return $decodeAsJson === true ? $decoded : $request;
-        } catch (RequestException $e) {
-            throw new Exception("HTTP request/response error: {$e->getMessage()}");
+            $response = $this->client->request('GET', $endpoint, ['query' => $params]);
+        } catch (GuzzleException $e) {
+            echo $e->getMessage();
         }
+
+        return json_decode($response->getBody());
     }
 
-    public function buscarEmpresas()
+    /**
+     * Realiza uma busca das linhas do sistema por denominação ou número da linha
+     *
+     * - Se a linha não é encontrada então é realizada uma busca fonetizada na denominação das linhas.
+     *
+     * @param string|int $busLine Exemplo: 8000, Lapa ou Ramos
+     *
+     * @return stdClass|array
+     *
+     * @noinspection PhpUnused
+     */
+    public function getManyBusLines(string|int $busLine): stdClass|array
     {
-        return json_decode(json_encode($this->execute($this->endpoint . $this->apiVersion . 'Empresa')), false);
+        return $this->executeGetRequest('Linha/Buscar', ['termosBusca' => $busLine]);
     }
 
-    public function buscarParadasPorLinha(string|int $codigoLinha)
+    /**
+     * Realiza uma busca das linhas do sistema por denominação ou número da linha.
+     *
+     * - Se a linha não é encontrada então é realizada uma busca fonetizada na denominação das linhas.
+     * A linha retornada será unicamente aquela cujo sentido de operação seja o informado no parâmetro sentido.
+     *
+     * @param string $busLine
+     * @param int $lineDirection 1:Terminal Principal>> Terminal Secundário | 2:Terminal Secundário>> Terminal Principal
+     *
+     * @return array|stdClass
+     *
+     * @noinspection PhpUnused
+     */
+    public function getBusLinesByDirection(string $busLine, int $lineDirection): array|stdClass
     {
-        if (!$this->verificarCodigos($codigoLinha)) {
-            return 'O código deve ter apenas caracteres númericos!';
+        $response = null;
+
+        try {
+            if ($lineDirection === 1 || $lineDirection === 2) {
+                $response = $this->executeGetRequest(
+                    'Linha/BuscarLinhaSentido',
+                    ['termosBusca' => $busLine, 'sentido' => $lineDirection]
+                );
+            }
+            throw new InvalidArgumentException;
+        } catch (InvalidArgumentException) {
+            echo 'Parameter lineDirection should be 1 or 2';
         }
-        $queryParams = [
-            'codigoLinha' => intval($codigoLinha),
-        ];
-        return json_decode(json_encode($this->execute($this->endpoint . $this->apiVersion . 'Parada/BuscarParadasPorLinha', $queryParams)), false);
+
+        return $response;
     }
 
-    public function verificarCodigos(...$codigos)
+    /**
+     * Realiza uma busca fonética das paradas de ônibus do sistema com base no parâmetro informado.
+     *
+     * - A consulta é realizada no nome da parada e também no seu endereço de localização.
+     *
+     * @param string $address Denominação ou número da linha 'total ou parcial'. Exemplo: 8000, Lapa ou Ramos
+     *
+     * @return array|stdClass
+     *
+     * @noinspection PhpUnused
+     */
+    public function getManyBusStopByAddress(string $address): array|stdClass
     {
-        foreach ($codigos as $codigo) {
-            if (!is_numeric($codigo)) {
-                return false; // retorna falso se algum parâmetro não for número
+        return $this->executeGetRequest('Parada/Buscar', ['termosBusca' => $address]);
+    }
+
+    /**
+     * Realiza uma busca por todos os pontos de parada atendidos por uma determinada linha.
+     *
+     * - O Código identificador da linha é único de cada linha do sistema (por sentido)
+     * e pode ser obtido através do método getManyBusLines()
+     *
+     * @param int $lineCode Código identificador da linha.
+     *
+     * @return array|stdClass
+     *
+     * @noinspection PhpUnused
+     */
+    public function getManyBusStopByLineCode(int $lineCode): array|stdClass
+    {
+        return $this->executeGetRequest(
+            'Parada/BuscarParadasPorLinha',
+            ['codigoLinha' => $lineCode]
+        );
+    }
+
+    /**
+     * Retorna a lista detalhada de todas as paradas que compõem um
+     * determinado corredor com base no código do corredor.
+     *
+     * - Código identificador do corredor é um identificador único de cada corredor do sistema e pode
+     * ser obtido através do método getBusLanes()
+     *
+     * @param int $laneCode
+     *
+     * @return array|stdClass
+     *
+     * @noinspection PhpUnused
+     */
+    public function getManyBusStopsByLane(int $laneCode): array|stdClass
+    {
+        return $this->executeGetRequest(
+            'Parada/BuscarParadasPorCorredor',
+            ['codigoCorredor' => $laneCode]
+        );
+    }
+
+    /**
+     * Retorna uma lista com todos os corredores inteligentes
+     *
+     * @return array Retorna uma lista com todos os corredores inteligentes.
+     *
+     * @noinspection PhpUnused
+     */
+    public function getAllBusLanes(): array
+    {
+        return $this->executeGetRequest('Corredor');
+    }
+
+    /**
+     * Retorna uma lista com todos as empresas operadoras relacionadas por área de operação
+     *
+     * @return stdClass
+     *
+     * @noinspection PhpUnused
+     */
+    public function getAllBusCompanies(): stdClass
+    {
+        return $this->executeGetRequest('Empresa');
+    }
+
+    /**
+     * Retorna uma lista completa com a última localização de todos os
+     * veículos mapeados com suas devidas posições lat / long
+     *
+     * @return array|stdClass
+     *
+     * @noinspection PhpUnused
+     */
+    public function getAllBusesPosition(): array|stdClass
+    {
+        return $this->executeGetRequest('Posicao');
+    }
+
+    /**
+     * Retorna uma lista com todos os veículos de uma determinada linha
+     * com suas devidas posições lat / long
+     *
+     * - Código identificador da linha. Este é um código identificador único de cada linha do
+     * sistema (por sentido) e pode ser obtido através do método getManyBusLines()
+     *
+     * @param int $lineCode
+     *
+     * @return array|stdClass
+     *
+     * @noinspection PhpUnused
+     */
+    public function getAllBusesByLineCode(int $lineCode): array|stdClass
+    {
+        return $this->executeGetRequest(
+            'Posicao/Linha',
+            ['codigoLinha' => $lineCode]
+        );
+    }
+
+    /**
+     * Retorna uma lista completa de todos os veículos mapeados que estejam
+     * transmitindo em uma garagem da empresa informada.
+     *
+     * - Código identificador da empresa. Este é um código identificador único que pode ser
+     * obtido através do método getAllBusCompany()
+     *
+     * - Código identificador da linha. Este é um código identificador único de
+     * cada linha do sistema (por sentido) e pode ser obtido através do método getManyBusLines()
+     *
+     * @param int $companyCode Código identificador da empresa
+     * @param int $lineCode Código identificador da linha
+     *
+     * @return array|stdClass
+     *
+     * @noinspection PhpUnused
+     */
+    public function getManyBusesInGarageFromCompany(int $companyCode, int $lineCode): array|stdClass
+    {
+        return $this->executeGetRequest(
+            'Posicao/Garagem',
+            ['codigoEmpresa' => $companyCode, 'codigoLinha' => $lineCode]
+        );
+    }
+
+    /**
+     * Retorna uma lista com a previsão de chegada dos veículos da
+     * linha informada que atende ao ponto de parada informado.
+     *
+     * - Código identificador da parada: Este é um código identificador único de
+     * cada ponto de parada do sistema (por sentido) e pode ser
+     * obtido através do método BUSCAR da categoria Paradas
+     *
+     * - Código identificador da parada. Este é um código identificador único de
+     * cada ponto de parada do sistema (por sentido) e pode ser obtido através do
+     * método BUSCAR da categoria Paradas
+     *
+     * - Código identificador da linha: Este é um código identificador
+     * único de cada linha do sistema (por sentido)
+     * e pode ser obtido através do método getManyBusLines()
+     *
+     * @param int $stopCode
+     * @param int $lineCode Código identificador da linha
+     *
+     * @return array|stdClass
+     *
+     * @noinspection PhpUnused
+     */
+    public function getArrivalPredictionByLineAndStop(int $stopCode, int $lineCode): array|stdClass
+    {
+        return $this->executeGetRequest(
+            'Previsao',
+            ['codigoParada' => $stopCode, 'codigoLinha' => $lineCode]
+        );
+    }
+
+    /**
+     * Retorna uma lista com a previsão de chegada dos veículos de cada uma das linhas que
+     * atendem ao ponto de parada informado.
+     *
+     * -Código identificador da parada. Este é um código identificador único de cada ponto
+     * de parada do sistema (por sentido) e pode ser obtido através do método getBusS
+     *
+     * @param int $stopCode Código identificador de parada.
+     *
+     * @return array|stdClass
+     *
+     * @noinspection PhpUnused
+     */
+    public function getArrivalPredictionByStop(int $stopCode): array|stdClass
+    {
+        return $this->executeGetRequest(
+            'Previsao',
+            ['codigoParada' => $stopCode]
+        );
+    }
+
+    /**
+     * Retorna o mapa completo da cidade.
+     *
+     * @param string $route
+     *
+     * @return StreamInterface
+     *
+     * @throws GuzzleException
+     *
+     * @noinspection PhpUnused
+     */
+    public function getKmzMapFile(string $route): StreamInterface
+    {
+        $response = null;
+
+        try {
+            $kmzEndpoint = $this->apiBaseUrl . $this->apiVersion . 'KMZ' . $route;
+
+            $headers = [
+                'headers' => [
+                    'Accept-Encoding' => 'gzip',
+                    'Content-Type' => 'application/vnd.google-earth.kmz'
+                ],
+                'stream' => true
+            ];
+
+            $response = $this->client->request('GET', $kmzEndpoint, $headers);
+
+            if ($response->getStatusCode() !== 200) {
+                throw new Exceptions();
             }
+        } catch (Exceptions) {
+            echo 'Ocorreu um erro';
         }
-        return true; // retorna verdadeiro se todos os parâmetros forem números
-    } // Buscar as paradas expecíficas de São Paulo
 
-    public function buscarParadasPorCorredor(string|int $codigoCorredor)
-    {
-        if (!$this->verificarCodigos($codigoCorredor)) {
-            return 'O código deve ter apenas caracteres númericos!';
-        }
-        $queryParams = [
-            'codigoCorredor' => intval($codigoCorredor),
-        ];
-        return json_decode(json_encode($this->execute($this->endpoint . $this->apiVersion . 'Parada/BuscarParadasPorCorredor', $queryParams)), false);
-    } // Buscar todos os corredores de São Paulo
-
-    public function buscarPosicaoTodosOnibus()
-    {
-        return json_encode($this->execute($this->endpoint . $this->apiVersion . 'Posicao'));
-    } // Buscar todas as empresas operadoras do transporte público de São Paulo
-
-    public function buscarPosicaoOnibusEspecifico(string|int $codigoLinha)
-    {
-        if (!$this->verificarCodigos($codigoLinha)) {
-            return 'O código deve ter apenas caracteres númericos!';
-        }
-        $queryParams = [
-            'codigoLinha' => intval($codigoLinha),
-        ];
-        return json_decode(json_encode($this->execute($this->endpoint . $this->apiVersion . 'Posicao/Linha', $queryParams)), false);
-    } // Buscar as paradas por linhas de São Paulo
-
-    public function buscarVeiculosGaragem(string|int $codigoEmpresa, string|int $codigoLinha)
-    {
-        if (!$this->verificarCodigos($codigoEmpresa, $codigoLinha)) {
-            return 'O código deve ter apenas caracteres númericos!';
-        }
-        $queryParams = [
-            'codigoEmpresa' => intval($codigoEmpresa),
-            'codigoLinha' => intval($codigoLinha),
-        ];
-        return json_decode(json_encode($this->execute($this->endpoint . $this->apiVersion . 'Posicao/Garagem', $queryParams)), false);
-    } // Buscar as paradas de São Paulo por corredor
-
-    public function buscarPrevisaoChegadaParadaLinha(string|int $codigoParada, string|int $codigoLinha)
-    {
-        if (!$this->verificarCodigos($codigoParada, $codigoLinha)) {
-            return 'O código deve ter apenas caracteres númericos!';
-        }
-        $queryParams = [
-            'codigoParada' => intval($codigoParada),
-            'codigoLinha' => intval($codigoLinha),
-        ];
-        return json_decode(json_encode($this->execute($this->endpoint . $this->apiVersion . 'Previsao', $queryParams)), false);
-    } // Buscar as posições de todos os ônibus de de São Paulo
-
-    public function buscarPrevisaoChegadaParada(string|int $codigoParada)
-    {
-        if (!$this->verificarCodigos($codigoParada)) {
-            return 'O código deve ter apenas caracteres númericos!';
-        }
-        $queryParams = [
-            'codigoParada' => intval($codigoParada),
-        ];
-        return json_decode(json_encode($this->execute($this->endpoint . $this->apiVersion . 'Previsao/Parada', $queryParams)), false);
-    } // Buscar a posição de ônibus de linhas específicas de São Paulo
-
-    public function buscarMapa($rota = '')
-    {
-        return $this->executeObterKMZ($rota);
-    } // Buscar os veículos em garagem de empresas específicas com base ou não na linha (opcional)
-
-    private function executeObterKMZ(string $rota = '')
-    {
-        $res = $this->client->request('GET', $this->endpoint . $this->apiVersion . 'KMZ' . $rota, [
-            'headers' => [
-                'Accept-Encoding' => 'gzip',
-                'Content-Type' => 'application/vnd.google-earth.kmz'
-            ],
-            'stream' => true
-        ]);
-
-        // Verifica se a resposta foi bem-sucedida
-        if ($res->getStatusCode() == 200) {
-            // Salva o conteúdo do arquivo KMZ
-            file_put_contents('mapa.kmz', $res->getBody());
-            return true;
-        } else {
-            return false;
-        }
-    } // Buscar a previsao de chegada de paradas específicas para linhas específicas de São Paulo
-
-    public function espBuscarChegadasLinhaParadas(string|int $linha, string|int $parada)
-        // Busca especializada das chegadas de uma linha em uma parada
-    {
-        if (!$this->isAuthenticated) {
-            return 'Você não está autenticado';
-        }
-        $return = false;
-        $jsonArray = array();
-        if (empty($linha) || empty($parada)) {
-            $return = 'empty';
-        } else {
-            try { // Tenta captar as informações necessárias para a verificação
-                $linhasInfo = $this->buscarLinhas($linha)[0];
-                $linhaCod = intval($this->buscarLinhas($linha)[0]->cl);
-                $parada = intval($this->buscarParadas($parada)[0]['cp']);
-                $prevChegadaLinha = $this->buscarPrevisaoChegadaLinha($linhaCod);
-            } catch (Exception $e) {
-                $return = 'invalid';
-            }
-            if ($return != 0) {
-                return json_encode($return);
-            } else {
-                /*
-                    Faz as verificações, na qual, quando o código de uma parada da linha informada for igual ao código
-                    da parada informada, é retornada todas as informações de ambas em um mesmo json.
-                */
-                $i = 0;
-                while ($i <= count($prevChegadaLinha->ps) - 1) {
-                    if (intval($prevChegadaLinha->ps[$i]->cp) == $parada) {
-                        $chegadaLinha = $prevChegadaLinha->ps[$i];
-                        array_push($jsonArray, $linhasInfo);
-                        array_push($jsonArray, $chegadaLinha);
-                        $jsonArray = array(
-                            "linha" => $jsonArray[0],
-                            "chegada" => $jsonArray[1],
-                        );
-                        return json_decode(json_encode($jsonArray), false);
-                    }
-                    $i++;
-                }
-            }
-        }
-        return $return;
-    } // Buscar a previsao de chegada de linhas específicas em todas as paradas que ela abrange de São Paulo
-
-    public function buscarLinhas(string|int $linha)
-    { // Buscar as linhas expecíficas de São Paulo
-        $queryParams = [
-            'termosBusca' => $linha,
-        ];
-        return json_decode(json_encode($this->execute($this->endpoint . $this->apiVersion . 'Linha/Buscar', $queryParams)), false);
-        // Retorna um objeto
-    } // Buscar a previsao de chegada de paradas específicas em todas as linhas que ela abrange de São Paulo
-
-    public function buscarParadas(string $endereco)
-    {
-        $queryParams = [
-            'termosBusca' => $endereco,
-        ];
-        return $this->execute($this->endpoint . $this->apiVersion . 'Parada/Buscar', $queryParams);
-    } // Busca o mapa geral, de corredores e de outras vias de SP (/Corredor, /OutrasVias)
-
-
-    // FUNÇÕES ESPECIALIZADAS (PODEM SER MAIS PRECISAS)
-
-    public function buscarPrevisaoChegadaLinha(string|int $codigoLinha)
-    {
-        if (!$this->verificarCodigos($codigoLinha)) {
-            return 'O código deve ter apenas caracteres númericos!';
-        }
-        $queryParams = [
-            'codigoLinha' => intval($codigoLinha),
-        ];
-        return json_decode(json_encode($this->execute($this->endpoint . $this->apiVersion . 'Previsao/Linha', $queryParams)), false);
+        return $response->getBody();
     }
 }
-
-
