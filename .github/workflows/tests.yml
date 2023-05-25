@@ -31,12 +31,14 @@ jobs:
         with:
           script: |
             const { Octokit } = require("@octokit/rest");
-            const githubContext = JSON.parse(process.env.GITHUB_CONTEXT);
+            const fs = require("fs");
 
-            const buildStatus = githubContext.payload.workflow_run.conclusion === 'success' ? 'passing' : 'failing';
+            const githubContext = JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, "utf8"));
+
+            const buildStatus = githubContext.workflow_run.conclusion === 'success' ? 'passing' : 'failing';
             const octokit = new Octokit({ auth: process.env.GT_TOKEN });
             await octokit.repos.createCommitStatus({
-              ...githubContext.repo,
+              ...githubContext.repository,
               sha: githubContext.sha,
               state: buildStatus,
               context: 'Tests',
