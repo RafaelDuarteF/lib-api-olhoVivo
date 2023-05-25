@@ -63,7 +63,7 @@ class OlhoVivo extends Exception
      */
     private function setApiEnvironmentVariables(): void
     {
-        if (!fileExists(dirname(__DIR__) . '.env')) {
+        if (!fileExists(dirname(__DIR__) . '/.env')) {
             $this->apiBaseUrl = getenv(self::SP_TRANS_API_BASE_URL);
             $this->apiVersion = getenv(self::SP_TRANS_API_VERSION);
             $this->apiToken = getenv(self::SP_TRANS_API_KEY);
