@@ -23,11 +23,14 @@ jobs:
       - name: Tests
         run: ./vendor/bin/pest
         
+      - name: Install Octokit
+        run: npm install @octokit/rest@18
+
       - name: Update Build Status
         uses: actions/github-script@v5
         with:
           script: |
-            const { Octokit } = require("https://cdn.skypack.dev/@octokit/rest");
+            const { Octokit } = require("@octokit/rest");
             const githubContext = JSON.parse(process.env.GITHUB_CONTEXT);
 
             const buildStatus = githubContext.payload.workflow_run.conclusion === 'success' ? 'passing' : 'failing';
