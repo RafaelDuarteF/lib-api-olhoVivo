@@ -27,20 +27,22 @@ jobs:
         run: npm install @octokit/rest@18
 
       - name: Update Build Status
-        uses: actions/github-script@v5
-        with:
-          script: |
-            const { Octokit } = require("@octokit/rest");
-            const fs = require("fs");
+        run: |
+          build_status=$(curl -s -X GET \
+            -H "Authorization: Bearer ${{ secrets.GT_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}")
 
-            const githubContext = JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, "utf8"));
+          conclusion=$(echo "$build_status" | jq -r '.conclusion')
 
-            const buildStatus = githubContext.workflow_run.conclusion === 'success' ? 'passing' : 'failing';
-            const octokit = new Octokit({ auth: process.env.GT_TOKEN });
-            await octokit.repos.createCommitStatus({
-              ...githubContext.repository,
-              sha: githubContext.sha,
-              state: buildStatus,
-              context: 'Tests',
-              description: `Build Status: ${buildStatus}`,
-            });
+          if [[ "$conclusion" == "success" ]]; then
+            build_status="passing"
+          else
+            build_status="failing"
+          fi
+
+          curl -s -X POST \
+            -H "Authorization: Bearer ${{ secrets.GT_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            -d "{\"state\": \"$build_status\", \"context\": \"Tests\", \"description\": \"Build Status: $build_status\"}" \
+            "https://api.github.com/repos/${{ github.repository }}/statuses/${{ github.sha }}"
