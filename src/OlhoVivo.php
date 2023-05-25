@@ -6,14 +6,13 @@ use stdClass;
 use Exception;
 use InvalidArgumentException;
 
-use Dotenv\Dotenv;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Message;
-use Psr\Http\Message\StreamInterface;
 use GuzzleHttp\Exception\{ClientException, GuzzleException};
 
-
-Dotenv::createImmutable(dirname(__DIR__))->load();
+if (file_exists(dirname(__DIR__) . '/.env')) {
+    \Dotenv\Dotenv::createImmutable(dirname(__DIR__))->load();
+}
 
 class OlhoVivo extends Exception
 {
@@ -60,18 +59,24 @@ class OlhoVivo extends Exception
      *
      * @noinspection PhpUndefinedFunctionInspection
      */
-    public function setApiEnvironmentVariables(): void
+    private function setApiEnvironmentVariables(): void
     {
+        if (!file_exists(dirname(__DIR__) . '/.env')) {
+            $this->apiBaseUrl = getenv(self::SP_TRANS_API_BASE_URL);
+            $this->apiVersion = getenv(self::SP_TRANS_API_VERSION);
+            $this->apiToken = getenv(self::SP_TRANS_API_KEY);
+            return;
+        }
+
         if (function_exists('env')) {
             $this->apiBaseUrl = env(self::SP_TRANS_API_BASE_URL);
             $this->apiVersion = env(self::SP_TRANS_API_VERSION);
             $this->apiToken = env(self::SP_TRANS_API_KEY);
-            return;
+        } else {
+            $this->apiBaseUrl = $_ENV[self::SP_TRANS_API_BASE_URL];
+            $this->apiVersion = $_ENV[self::SP_TRANS_API_VERSION];
+            $this->apiToken = $_ENV[self::SP_TRANS_API_KEY];
         }
-
-        $this->apiBaseUrl = $_ENV[self::SP_TRANS_API_BASE_URL];
-        $this->apiVersion = $_ENV[self::SP_TRANS_API_VERSION];
-        $this->apiToken = $_ENV[self::SP_TRANS_API_KEY];
     }
 
     /**
@@ -79,7 +84,7 @@ class OlhoVivo extends Exception
      *
      * @return void
      */
-    public function setClientOptions(): void
+    private function setClientOptions(): void
     {
         $this->clientOptions = [
             'base_uri' => $this?->apiBaseUrl . $this?->apiVersion,
@@ -151,7 +156,7 @@ class OlhoVivo extends Exception
      *
      * @return array | stdClass
      */
-    public function executeGetRequest(string $endpoint, array $params = []): array|stdClass
+    protected function executeGetRequest(string $endpoint, array $params = []): array|stdClass
     {
         $response = null;
 
@@ -189,11 +194,11 @@ class OlhoVivo extends Exception
      * @param string $busLine
      * @param int $lineDirection 1:Terminal Principal>> Terminal Secundário | 2:Terminal Secundário>> Terminal Principal
      *
-     * @return array|stdClass
+     * @return array|stdClass|null
      *
      * @noinspection PhpUnused
      */
-    public function getBusLinesByDirection(string $busLine, int $lineDirection): array|stdClass
+    public function getBusLinesByDirection(string $busLine, int $lineDirection): array|stdClass|null
     {
         $response = null;
 
@@ -261,7 +266,7 @@ class OlhoVivo extends Exception
      *
      * @noinspection PhpUnused
      */
-    public function getManyBusStopsByLane(int $laneCode): array|stdClass
+    public function getManyBusStopsByLaneCode(int $laneCode): array|stdClass
     {
         return $this->executeGetRequest(
             'Parada/BuscarParadasPorCorredor',
@@ -402,43 +407,5 @@ class OlhoVivo extends Exception
             'Previsao',
             ['codigoParada' => $stopCode]
         );
-    }
-
-    /**
-     * Retorna o mapa completo da cidade.
-     *
-     * @param string $route
-     *
-     * @return StreamInterface
-     *
-     * @throws GuzzleException
-     *
-     * @noinspection PhpUnused
-     */
-    public function getKmzMapFile(string $route): StreamInterface
-    {
-        $response = null;
-
-        try {
-            $kmzEndpoint = $this->apiBaseUrl . $this->apiVersion . 'KMZ' . $route;
-
-            $headers = [
-                'headers' => [
-                    'Accept-Encoding' => 'gzip',
-                    'Content-Type' => 'application/vnd.google-earth.kmz'
-                ],
-                'stream' => true
-            ];
-
-            $response = $this->client->request('GET', $kmzEndpoint, $headers);
-
-            if ($response->getStatusCode() !== 200) {
-                throw new Exceptions();
-            }
-        } catch (Exceptions) {
-            echo 'Ocorreu um erro';
-        }
-
-        return $response->getBody();
     }
 }

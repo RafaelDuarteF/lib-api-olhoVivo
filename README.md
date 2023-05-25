@@ -1,11 +1,12 @@
-# Biblioteca para a API olho vivo
+[![Testes](https://img.shields.io/badge/Testes-passing-brightgreen)](https://github.com/r3c4-d3v/lib-api-olhoVivo/actions/workflows/tests.yml)
+
+## Biblioteca para a API olho vivo
 
 Biblioteca para consumir a API olho vivo da SP Trans. <br>
 Obtenha todas as informações sobre os ônibus de São Paulo através dessa API. LIB em PHP para consumi-lá facilmente.
 
 Certifique-se de que você possui o composer em seu projeto e tenha um token de aplicativo da SP
-Trans. <a href="https://www.sptrans.com.br/desenvolvedores/api-do-olho-vivo-guia-de-referencia/">Guia de referência da
-API</a>
+Trans. 
 
  ```shell
  composer require rafaelduarte/olhovivo 
@@ -23,7 +24,7 @@ SP_TRANS_API_VERSION=v2.1/
 
 Importe no arquivo que deseja usar com: use RafaelDuarte\OlhoVivo\OlhoVivo;
 
-# Exemplo de uso
+### Exemplo de uso
 
  ```php
  
@@ -81,11 +82,6 @@ class UserController extends Controller
  
  ```
 
-# Documentação API
-
-Para verificar os tipos de retorno e funcionamento da API, você pode acessar a documentação oficial da
-API <a href="https://www.sptrans.com.br/desenvolvedores/api-do-olho-vivo-guia-de-referencia/documentacao-api/">aqui.</a>
-
 # Pré-requisitos para contribuir
 
 Certifique-se de ter o Docker e o Docker Compose instalados em seu sistema. <br>
@@ -103,14 +99,13 @@ Docker Compose: [Instalação do Docker Compose](https://docs.docker.com/compose
 ```shell
 docker-compose up --build 
 ```
-
 Isso irá construir as imagens e iniciar os containers com base nas configurações definidas no arquivo
 docker-compose.yml.
 
-O código fonte do projeto está vinculado ao contêiner e será sincronizado automaticamente. <br>
+- O código fonte do projeto está vinculado ao contêiner e será sincronizado automaticamente. <br>
 Isso significa que qualquer alteração feita nos arquivos locais será refletida no contêiner em tempo real.
-Instale a lib em seu projeto com o comando no composer abaixo: <br>
 
+### Parar execução do container
 Para parar a execução do projeto, você pode pressionar `Ctrl + C` no terminal onde o `docker-compose up` foi executado
 ou executar o seguinte comando no diretório raiz do projeto:
 
@@ -120,4 +115,10 @@ docker-compose down
 
 Com essas instruções, você poderá executar o projeto utilizando o Docker e o Docker Compose, garantindo um ambiente
 isolado e facilitando o processo de desenvolvimento e execução.
+
+### Documentação API
+
+Para verificar os tipos de retorno e funcionamento da API, você pode acessar a documentação oficial da
+API da OlhoVivo <a href="https://www.sptrans.com.br/desenvolvedores/api-do-olho-vivo-guia-de-referencia/documentacao-api/">aqui.</a>
+
 
