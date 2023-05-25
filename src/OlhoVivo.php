@@ -72,7 +72,7 @@ class OlhoVivo extends Exception
         $this->apiVersion = $_ENV[self::SP_TRANS_API_VERSION];
         $this->apiToken = $_ENV[self::SP_TRANS_API_KEY];
 
-        if (empty($this->apiBaseUrl) || empty($this->apiVersion) || empty($this->apiToken)) {
+        if (!$this->apiBaseUrl || !$this->apiVersion || !$this->apiToken) {
             $this->apiBaseUrl = getenv(self::SP_TRANS_API_BASE_URL);
             $this->apiVersion = getenv(self::SP_TRANS_API_VERSION);
             $this->apiToken = getenv(self::SP_TRANS_API_KEY);
