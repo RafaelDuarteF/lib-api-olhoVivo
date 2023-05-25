@@ -107,10 +107,10 @@ docker-compose up --build
 Isso irá construir as imagens e iniciar os containers com base nas configurações definidas no arquivo
 docker-compose.yml.
 
-O código fonte do projeto está vinculado ao contêiner e será sincronizado automaticamente. <br>
+- O código fonte do projeto está vinculado ao contêiner e será sincronizado automaticamente. <br>
 Isso significa que qualquer alteração feita nos arquivos locais será refletida no contêiner em tempo real.
-Instale a lib em seu projeto com o comando no composer abaixo: <br>
 
+### Parar execução do container
 Para parar a execução do projeto, você pode pressionar `Ctrl + C` no terminal onde o `docker-compose up` foi executado
 ou executar o seguinte comando no diretório raiz do projeto:
 
