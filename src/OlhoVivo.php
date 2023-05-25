@@ -6,15 +6,14 @@ use stdClass;
 use Exception;
 use InvalidArgumentException;
 
-use Dotenv\Dotenv;
+//use Dotenv\Dotenv;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Message;
 use GuzzleHttp\Exception\{ClientException, GuzzleException};
-use function PHPUnit\Framework\fileExists;
 
-if (fileExists(dirname(__DIR__) . '/.env')) {
-    Dotenv::createImmutable(dirname(__DIR__))->load();
-}
+//if (file_exists(dirname(__DIR__) . '/.env')) {
+//    Dotenv::createImmutable(dirname(__DIR__))->load();
+//}
 
 class OlhoVivo extends Exception
 {
@@ -63,7 +62,7 @@ class OlhoVivo extends Exception
      */
     private function setApiEnvironmentVariables(): void
     {
-        if (!fileExists(dirname(__DIR__) . '/.env')) {
+        if (!file_exists(dirname(__DIR__) . '/.env')) {
             $this->apiBaseUrl = getenv(self::SP_TRANS_API_BASE_URL);
             $this->apiVersion = getenv(self::SP_TRANS_API_VERSION);
             $this->apiToken = getenv(self::SP_TRANS_API_KEY);
@@ -74,13 +73,11 @@ class OlhoVivo extends Exception
             $this->apiBaseUrl = env(self::SP_TRANS_API_BASE_URL);
             $this->apiVersion = env(self::SP_TRANS_API_VERSION);
             $this->apiToken = env(self::SP_TRANS_API_KEY);
-            return;
+        } else {
+            $this->apiBaseUrl = $_ENV[self::SP_TRANS_API_BASE_URL];
+            $this->apiVersion = $_ENV[self::SP_TRANS_API_VERSION];
+            $this->apiToken = $_ENV[self::SP_TRANS_API_KEY];
         }
-
-        $this->apiBaseUrl = $_ENV[self::SP_TRANS_API_BASE_URL];
-        $this->apiVersion = $_ENV[self::SP_TRANS_API_VERSION];
-        $this->apiToken = $_ENV[self::SP_TRANS_API_KEY];
-
     }
 
     /**
