@@ -16,6 +16,12 @@ jobs:
           php-version: 8.2
           tools: composer:v2
           coverage: xdebug
+          
+      - name: Clear Composer Cache
+        run: composer clear-cache
+
+      - name: Update Composer
+        run: composer self-update
  
       - name: Install Dependencies
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
