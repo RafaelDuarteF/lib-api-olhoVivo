@@ -1,6 +1,4 @@
-[![Build Status](https://img.shields.io/badge/Build-passing-brightgreen)](https://github.com/r3c4-d3v/lib-api-olhoVivo/actions)
-[![Build Status](https://img.shields.io/badge/Build-failing-red)](https://github.com/r3c4-d3v/lib-api-olhoVivo/actions)
-
+[![Testes](https://img.shields.io/badge/Testes-passing-brightgreen)](https://github.com/r3c4-d3v/lib-api-olhoVivo/actions/workflows/test.yml)
 
 ## Biblioteca para a API olho vivo
 
