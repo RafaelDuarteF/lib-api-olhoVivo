@@ -32,4 +32,4 @@ jobs:
           label: Build
           message: ${{ job.status }}
           color: ${{ job.status == 'success' && 'green'}}
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GT_TOKEN }}
