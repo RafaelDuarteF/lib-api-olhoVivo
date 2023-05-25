@@ -1,5 +1,6 @@
-[![CI/CD](https://github.com/EnricoMi/publish-unit-test-result-action/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/r3c4-d3v/lib-api-olhoVivo/blob/main/.github/workflows/tests.yml)
-![Build Status](https://github.com/r3c4-d3v/lib-api-olhoVivo/actions/workflows/tests.yml/badge.svg)
+[![Build Status](https://img.shields.io/badge/Build-passing-brightgreen)](https://github.com/r3c4-d3v/lib-api-olhoVivo/actions)
+[![Build Status](https://img.shields.io/badge/Build-failing-red)](https://github.com/r3c4-d3v/lib-api-olhoVivo/actions)
+
 
 ## Biblioteca para a API olho vivo
 
