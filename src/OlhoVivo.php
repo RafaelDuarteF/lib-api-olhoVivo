@@ -10,6 +10,7 @@ use Dotenv\Dotenv;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Message;
 use GuzzleHttp\Exception\{ClientException, GuzzleException};
+use function PHPUnit\Framework\fileExists;
 
 
 Dotenv::createImmutable(dirname(__DIR__))->load();
@@ -61,6 +62,13 @@ class OlhoVivo extends Exception
      */
     private function setApiEnvironmentVariables(): void
     {
+        if (!fileExists(dirname(__DIR__) . '.env')) {
+            $this->apiBaseUrl = getenv(self::SP_TRANS_API_BASE_URL);
+            $this->apiVersion = getenv(self::SP_TRANS_API_VERSION);
+            $this->apiToken = getenv(self::SP_TRANS_API_KEY);
+            return;
+        }
+
         if (function_exists('env')) {
             $this->apiBaseUrl = env(self::SP_TRANS_API_BASE_URL);
             $this->apiVersion = env(self::SP_TRANS_API_VERSION);
@@ -72,11 +80,6 @@ class OlhoVivo extends Exception
         $this->apiVersion = $_ENV[self::SP_TRANS_API_VERSION];
         $this->apiToken = $_ENV[self::SP_TRANS_API_KEY];
 
-        if (!$this->apiBaseUrl || !$this->apiVersion || !$this->apiToken) {
-            $this->apiBaseUrl = getenv(self::SP_TRANS_API_BASE_URL);
-            $this->apiVersion = getenv(self::SP_TRANS_API_VERSION);
-            $this->apiToken = getenv(self::SP_TRANS_API_KEY);
-        }
     }
 
     /**
