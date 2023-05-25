@@ -1,4 +1,4 @@
-[![Testes](https://img.shields.io/badge/Testes-passing-brightgreen)](https://github.com/r3c4-d3v/lib-api-olhoVivo/actions/workflows/test.yml)
+[![Testes](https://img.shields.io/badge/Testes-passing-brightgreen)](https://github.com/r3c4-d3v/lib-api-olhoVivo/actions/workflows/tests.yml)
 
 ## Biblioteca para a API olho vivo
 
