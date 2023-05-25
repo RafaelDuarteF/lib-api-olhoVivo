@@ -22,3 +22,19 @@ jobs:
  
       - name: Tests
         run: ./vendor/bin/pest
+        
+      - name: Update Build Status
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const { context } = require('@actions/github');
+            
+            const buildStatus = context.payload.workflow_run.conclusion === 'success' ? 'passing' : 'failing';
+            const octokit = github.getOctokit(process.env.GITHUB_TOKEN);
+            await octokit.repos.createCommitStatus({
+              ...context.repo,
+              sha: context.sha,
+              state: buildStatus,
+              context: 'Tests',
+              description: `Build Status: ${buildStatus}`,
+            });
