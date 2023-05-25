@@ -19,7 +19,8 @@
     },
     "autoload": {
         "psr-4": {
-            "RafaelDuarte\\": "src/"
+            "RafaelDuarte\\": "src/",
+            "RafaelDuarte\\Tests": "tests/"
         }
     },
     "minimum-stability": "stable",
