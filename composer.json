@@ -20,7 +20,7 @@
     "autoload": {
         "psr-4": {
             "RafaelDuarte\\": "src/",
-            "RafaelDuarte\\Tests": "tests/"
+            "RafaelDuarte\\Tests\\": "tests/"
         }
     },
     "minimum-stability": "stable",
