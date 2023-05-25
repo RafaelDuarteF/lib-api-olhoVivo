@@ -27,10 +27,11 @@ jobs:
         uses: actions/github-script@v5
         with:
           script: |
-            const { context: githubContext } = require('@actions/github');
+            const { Octokit } = require("https://cdn.skypack.dev/@octokit/rest");
+            const githubContext = JSON.parse(process.env.GITHUB_CONTEXT);
 
             const buildStatus = githubContext.payload.workflow_run.conclusion === 'success' ? 'passing' : 'failing';
-            const octokit = github.getOctokit(process.env.GT_TOKEN);
+            const octokit = new Octokit({ auth: process.env.GT_TOKEN });
             await octokit.repos.createCommitStatus({
               ...githubContext.repo,
               sha: githubContext.sha,
