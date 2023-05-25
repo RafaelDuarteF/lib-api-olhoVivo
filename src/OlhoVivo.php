@@ -6,14 +6,13 @@ use stdClass;
 use Exception;
 use InvalidArgumentException;
 
-//use Dotenv\Dotenv;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Message;
 use GuzzleHttp\Exception\{ClientException, GuzzleException};
 
-//if (file_exists(dirname(__DIR__) . '/.env')) {
-//    Dotenv::createImmutable(dirname(__DIR__))->load();
-//}
+if (file_exists(dirname(__DIR__) . '/.env')) {
+    \Dotenv\Dotenv::createImmutable(dirname(__DIR__))->load();
+}
 
 class OlhoVivo extends Exception
 {
