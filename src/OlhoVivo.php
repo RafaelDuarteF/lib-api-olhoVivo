@@ -9,7 +9,6 @@ use InvalidArgumentException;
 use Dotenv\Dotenv;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Message;
-use Psr\Http\Message\StreamInterface;
 use GuzzleHttp\Exception\{ClientException, GuzzleException};
 
 
@@ -72,6 +71,12 @@ class OlhoVivo extends Exception
         $this->apiBaseUrl = $_ENV[self::SP_TRANS_API_BASE_URL];
         $this->apiVersion = $_ENV[self::SP_TRANS_API_VERSION];
         $this->apiToken = $_ENV[self::SP_TRANS_API_KEY];
+
+        if (empty($this->apiBaseUrl) || empty($this->apiVersion) || empty($this->apiToken)) {
+            $this->apiBaseUrl = getenv(self::SP_TRANS_API_BASE_URL);
+            $this->apiVersion = getenv(self::SP_TRANS_API_VERSION);
+            $this->apiToken = getenv(self::SP_TRANS_API_KEY);
+        }
     }
 
     /**
