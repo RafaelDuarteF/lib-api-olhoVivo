@@ -25,7 +25,7 @@
     },
     "minimum-stability": "stable",
     "prefer-stable": true,
-    "version": "2.0",
+    "version": "2.0.0",
     "require-dev": {
         "symfony/var-dumper": "^6.2",
         "pestphp/pest": "^2.6"
